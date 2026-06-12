@@ -1,1 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Striking Distance — Hawk Marketing</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#F5F2EA; --paper:#FFFFFF; --ink:#1C1B19; --muted:#6B6557; --faint:#9A9384;
+    --line:#E5E0D3; --accent:#C8472B; --accentSoft:#FBEAE4; --forest:#2F5D50; --forestSoft:#E6EFEB; --amber:#B45309;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6}
+  .wrap{max-width:920px;margin:0 auto;padding:32px 22px 64px}
+  h1{font-family:'Fraunces',Georgia,serif;font-size:32px;font-weight:600;letter-spacing:-.01em;margin:0}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+  .serif{font-family:'Fraunces',Georgia,serif}
+  .tag{font-size:11px;color:var(--forest);border:1px solid var(--forest);border-radius:5px;padding:2px 7px}
+  .lead{color:var(--muted);font-size:14.5px;max-width:660px;margin:8px 0 24px}
+  .drop{background:var(--paper);border:1.5px dashed var(--line);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:.15s}
+  .drop:hover{border-color:var(--accent)}
+  .drop.drag{background:var(--accentSoft);border-color:var(--accent)}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:12px}
+  .controls{padding:18px;margin-top:16px;display:none}
+  .grid5{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:12px;align-items:end}
+  label.f{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;display:block;margin-bottom:5px}
+  input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:13.5px;background:var(--paper);color:var(--ink);font-family:inherit}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .stats{display:none;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .stat .l{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .stat .v{font-family:'Fraunces',Georgia,serif;font-size:30px;font-weight:600;line-height:1.15;margin-top:3px}
+  .stat .s{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .results{margin-top:16px;overflow:hidden;display:none}
+  .rhead{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+  th{text-align:right;padding:9px 14px;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);background:#FAF8F1;position:sticky;top:0}
+  th.q{text-align:left;width:44%}
+  td{padding:9px 14px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+  td.q{text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  tr:hover td{background:#FAF8F1}
+  .scroll{max-height:460px;overflow-y:auto}
+  button{background:var(--ink);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+  button:hover{opacity:.9}
+  .note{font-size:12px;color:var(--faint);margin-top:14px;display:none}
+  .err{margin-top:12px;padding:10px 13px;background:var(--accentSoft);border-radius:8px;font-size:13px;color:#7a2a18;display:none}
+  .warn{color:var(--amber);font-weight:600;font-size:10.5px;white-space:nowrap}
+  .bar{position:absolute;right:0;top:0;bottom:0;background:var(--forestSoft)}
+  .up{position:relative;font-weight:600;color:var(--forest)}
+  footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer a{color:var(--muted);text-decoration:none}
+  @media(max-width:680px){.grid5{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+    <h1>Striking Distance</h1>
+    <span class="mono tag">GSC EXPORT · RUNS LOCALLY</span>
+  </div>
+  <p class="lead">Drop a Search Console Performance export. This surfaces the queries ranking just off the top three — where a small push has the most click upside — with brand terms stripped. Everything runs in your browser; your file never leaves your machine or touches a server.</p>
+
+  <div class="drop" id="drop">
+    <div style="font-size:14.5px;font-weight:600" id="dropmsg">Drop your GSC export here, or click to choose</div>
+    <div class="mono" style="font-size:11.5px;color:var(--faint);margin-top:6px">.xlsx or .csv · reads the Queries tab</div>
+    <input type="file" id="file" accept=".xlsx,.csv" style="display:none" />
+  </div>
+  <div class="err" id="err"></div>
+
+  <div class="card controls" id="controls">
+    <div class="grid5">
+      <div><label class="f">Brand terms to strip (comma-sep)</label><input id="brand" type="text" placeholder="e.g. lottoland" /></div>
+      <div><label class="f">Min position</label><input id="pmin" type="number" value="4" /></div>
+      <div><label class="f">Max position</label><input id="pmax" type="number" value="12" /></div>
+      <div><label class="f">Min impressions</label><input id="impr" type="number" value="200" /></div>
+      <div><label class="f">Target position</label><select id="target"><option>1</option><option>2</option><option selected>3</option></select></div>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="card results" id="results">
+    <div class="rhead">
+      <span class="serif" style="font-size:18px;font-weight:600">Ranked opportunities</span>
+      <button id="csv">Export CSV</button>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr>
+          <th class="q">Query</th><th>Impr.</th><th>Pos.</th><th>Clicks</th><th>Est. uplift</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div id="more" style="padding:10px 16px;font-size:12px;color:var(--faint);text-align:center"></div>
+  </div>
+
+  <p class="note" id="note">Uplift = impressions × CTR-at-target-position − current clicks, using a standard position-CTR curve. It's a prioritisation estimate, not a forecast: the real curve depends on SERP features (ads, AI Overviews, snippets), so rows flagged <span style="color:var(--amber)">⚠ low CTR</span> warrant a manual SERP check before you trust the number.</p>
+
+  <footer>
+    <span>Built by <a href="https://hawkmarketing.io">Hawk Marketing</a> · SEO &amp; AI search consultancy</span>
+    <span class="mono">data stays in your browser</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var CTR={1:.275,2:.155,3:.1,4:.07,5:.05,6:.038,7:.03,8:.024,9:.02,10:.017};
+  function expCtr(p){if(p<=1)return CTR[1];if(p>=10)return CTR[10];var lo=Math.floor(p),hi=Math.ceil(p);if(lo===hi)return CTR[lo];return CTR[lo]+(CTR[hi]-CTR[lo])*(p-lo);}
+  var rows=[],last=[];
+  var $=function(id){return document.getElementById(id);};
+  function fmt(n){return Number(n).toLocaleString();}
+  function pick(r,names){var keys=Object.keys(r);for(var i=0;i<names.length;i++){var k=keys.find(function(key){return key.trim().toLowerCase()===names[i];});if(k!=null)return r[k];}return undefined;}
+  function parse(raw){return raw.map(function(r){var q=pick(r,['top queries','query','queries']);var ctr=pick(r,['ctr']);var pos=pick(r,['position','avg. position','average position']);var cl=pick(r,['clicks']);var im=pick(r,['impressions']);if(typeof ctr==='string')ctr=parseFloat(ctr.replace('%',''))/100;if(typeof ctr==='number'&&ctr>1.5)ctr=ctr/100;return {query:String(q==null?'':q).trim(),clicks:Number(cl),impressions:Number(im),ctr:Number(ctr),position:Number(pos)};}).filter(function(r){return r.query&&!isNaN(r.position)&&!isNaN(r.impressions);});}
+
+  function handleFile(file){
+    $('err').style.display='none';
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+        var sn=wb.SheetNames.find(function(s){return s.toLowerCase().indexOf('quer')>-1;})||wb.SheetNames[0];
+        var parsed=parse(XLSX.utils.sheet_to_json(wb.Sheets[sn]));
+        if(!parsed.length){return showErr("Couldn't find query rows. Use a GSC Performance export with a Queries tab (query, clicks, impressions, CTR, position).");}
+        rows=parsed;
+        $('dropmsg').textContent='Loaded: '+file.name+' · '+fmt(rows.length)+' queries';
+        $('controls').style.display='block';
+        compute();
+      }catch(err){showErr("Couldn't read that file. Use a GSC export as .xlsx or .csv.");}
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  function showErr(m){$('err').textContent=m;$('err').style.display='block';}
+
+  function compute(){
+    if(!rows.length)return;
+    var brand=($('brand').value||'').split(',').map(function(s){return s.trim().toLowerCase();}).filter(Boolean);
+    var pmin=+$('pmin').value,pmax=+$('pmax').value,mimpr=+$('impr').value,tp=+$('target').value;
+    var isBrand=function(q){return brand.some(function(b){return q.toLowerCase().indexOf(b)>-1;});};
+    var tctr=CTR[tp]||.1, stripped=rows.filter(function(r){return isBrand(r.query);}).length;
+    var scored=rows.filter(function(r){return r.position>=pmin&&r.position<=pmax&&r.impressions>=mimpr&&!isBrand(r.query);}).map(function(r){
+      var uplift=Math.max(0,Math.round(r.impressions*tctr-r.clicks));
+      var eh=expCtr(r.position);
+      return {q:r.query,impr:r.impressions,pos:r.position,clicks:r.clicks,uplift:uplift,health:eh>0?r.ctr/eh:1};
+    }).sort(function(a,b){return b.uplift-a.uplift;});
+    last=scored;
+    var total=scored.reduce(function(s,r){return s+r.uplift;},0),maxU=scored.length?scored[0].uplift:1;
+    $('stats').style.display='grid';
+    $('stats').innerHTML=
+      card('Opportunities',fmt(scored.length),'from '+fmt(rows.length)+' queries','var(--ink)')+
+      card('Est. total click upside',fmt(total),'if all moved to top '+tp,'var(--forest)')+
+      card('Brand terms stripped',fmt(stripped),brand.length?brand.join(', '):'none set','var(--muted)');
+    var tb=$('tbody');tb.innerHTML='';
+    scored.slice(0,100).forEach(function(r){
+      var warn=r.health<0.4?' <span class="warn" title="CTR far below expected for this position — verify the SERP before trusting the uplift">⚠ low CTR</span>':'';
+      var w=Math.max(4,Math.round(r.uplift/maxU*100));
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td class="q">'+r.q+warn+'</td><td style="color:var(--muted)">'+fmt(r.impr)+'</td><td>'+r.pos.toFixed(1)+'</td><td style="color:var(--muted)">'+fmt(r.clicks)+'</td><td style="position:relative"><div class="bar" style="width:'+w+'%"></div><span class="up">+'+fmt(r.uplift)+'</span></td>';
+      tb.appendChild(tr);
+    });
+    $('more').textContent=scored.length>100?('Showing top 100 of '+fmt(scored.length)+' — export CSV for the full list'):'';
+    $('results').style.display='block';$('note').style.display='block';
+  }
+  function card(l,v,s,c){return '<div class="stat"><div class="l">'+l+'</div><div class="v" style="color:'+c+'">'+v+'</div><div class="s">'+s+'</div></div>';}
+
+  $('drop').addEventListener('click',function(){$('file').click();});
+  $('file').addEventListener('change',function(e){if(e.target.files[0])handleFile(e.target.files[0]);});
+  ['brand','pmin','pmax','impr','target'].forEach(function(id){$(id).addEventListener('input',compute);});
+  $('drop').addEventListener('dragover',function(e){e.preventDefault();$('drop').classList.add('drag');});
+  $('drop').addEventListener('dragleave',function(){$('drop').classList.remove('drag');});
+  $('drop').addEventListener('drop',function(e){e.preventDefault();$('drop').classList.remove('drag');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+  $('csv').addEventListener('click',function(){
+    if(!last.length)return;
+    var lines=[['query','impressions','position','clicks','estimated_uplift'].join(',')].concat(last.map(function(r){return ['"'+r.q.replace(/"/g,'""')+'"',r.impr,r.pos.toFixed(1),r.clicks,r.uplift].join(',');}));
+    var url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));
+    var a=document.createElement('a');a.href=url;a.download='striking-distance.csv';a.click();URL.revokeObjectURL(url);
+  });
+})();
+</script>
+</body>
+</html>
 
