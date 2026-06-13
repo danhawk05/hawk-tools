@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Intent Mismatch Auditor — Hawk Marketing</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#F5F2EA; --paper:#FFFFFF; --ink:#1C1B19; --muted:#6B6557; --faint:#9A9384;
+    --line:#E5E0D3; --accent:#C8472B; --accentSoft:#FBEAE4; --forest:#2F5D50; --forestSoft:#E6EFEB; --amber:#B45309; --amberSoft:#FBF0DD;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 22px 64px}
+  h1{font-family:'Fraunces',Georgia,serif;font-size:32px;font-weight:600;letter-spacing:-.01em;margin:0}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+  .serif{font-family:'Fraunces',Georgia,serif}
+  .tag{font-size:11px;color:var(--forest);border:1px solid var(--forest);border-radius:5px;padding:2px 7px}
+  .lead{color:var(--muted);font-size:14.5px;max-width:680px;margin:8px 0 24px}
+  .drops{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .drop{background:var(--paper);border:1.5px dashed var(--line);border-radius:12px;padding:22px;text-align:center;cursor:pointer;transition:.15s}
+  .drop:hover{border-color:var(--accent)}
+  .drop.drag{background:var(--accentSoft);border-color:var(--accent)}
+  .drop.loaded{border-style:solid;border-color:var(--forest);background:var(--forestSoft)}
+  .drop .t{font-size:14px;font-weight:600}
+  .drop .s{font-size:11.5px;color:var(--faint);margin-top:5px}
+  .drop .opt{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:6px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:12px}
+  .controls{padding:18px;margin-top:16px;display:none}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end}
+  label.f{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;display:block;margin-bottom:5px}
+  input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:13.5px;background:var(--paper);color:var(--ink);font-family:inherit}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .matchbar{display:none;margin-top:14px;padding:10px 14px;border-radius:8px;font-size:13px}
+  .stats{display:none;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .stat .l{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .stat .v{font-family:'Fraunces',Georgia,serif;font-size:30px;font-weight:600;line-height:1.15;margin-top:3px}
+  .stat .s{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .results{margin-top:16px;overflow:hidden;display:none}
+  .rhead{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:right;padding:9px 14px;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);background:#FAF8F1;position:sticky;top:0}
+  th.l{text-align:left}
+  td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;vertical-align:top}
+  td.l{text-align:left}
+  tr:hover td{background:#FAF8F1}
+  .scroll{max-height:520px;overflow-y:auto}
+  button{background:var(--ink);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+  button:hover{opacity:.9}
+  .verdict{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;display:inline-block}
+  .v-notans{background:var(--accentSoft);color:var(--accent)}
+  .v-thin{background:var(--amberSoft);color:var(--amber)}
+  .v-ctr{background:#EFEBDF;color:var(--muted)}
+  .note{font-size:12px;color:var(--faint);margin-top:14px;line-height:1.55;display:none}
+  .err{margin-top:12px;padding:10px 13px;background:var(--accentSoft);border-radius:8px;font-size:13px;color:#7a2a18;display:none}
+  footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer a{color:var(--muted);text-decoration:none}
+  @media(max-width:680px){.grid4{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr}.drops{grid-template-columns:1fr}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+    <h1>Intent Mismatch Auditor</h1>
+    <span class="mono tag">GSC + GA4 · RUNS LOCALLY</span>
+  </div>
+  <p class="lead">Finds pages that <em>rank</em> for queries they don't actually answer — strong position, collapsed click-through, and (when GA4 is added) visitors who bounce fast. You're winning the ranking but losing the visitor. Drop a Search Console <strong>Pages</strong> export; add a GA4 <strong>Pages and screens</strong> export to layer in engagement. Everything runs in your browser.</p>
+
+  <div class="drops">
+    <div class="drop" id="dropGsc">
+      <div class="opt">Required</div>
+      <div class="t" id="gscMsg">Drop GSC Pages export</div>
+      <div class="s">.xlsx — reads the Pages tab</div>
+      <input type="file" id="fileGsc" accept=".xlsx,.csv" style="display:none" />
+    </div>
+    <div class="drop" id="dropGa4">
+      <div class="opt">Optional — adds engagement</div>
+      <div class="t" id="ga4Msg">Drop GA4 Pages &amp; screens export</div>
+      <div class="s">.csv — "Pages and screens" report</div>
+      <input type="file" id="fileGa4" accept=".csv,.xlsx" style="display:none" />
+    </div>
+  </div>
+  <div class="err" id="err"></div>
+  <div class="matchbar" id="matchbar"></div>
+
+  <div class="card controls" id="controls">
+    <div class="grid4">
+      <div><label class="f">Max position (ranks at least this well)</label><input id="maxpos" type="number" value="10" /></div>
+      <div><label class="f">CTR health ceiling (× expected)</label><input id="ctrratio" type="number" step="0.05" value="0.5" /></div>
+      <div><label class="f">Min impressions</label><input id="minimpr" type="number" value="100" /></div>
+      <div><label class="f">Engagement floor (sec, GA4)</label><input id="engfloor" type="number" value="30" /></div>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="card results" id="results">
+    <div class="rhead">
+      <span class="serif" style="font-size:18px;font-weight:600">Pages ranking but not answering</span>
+      <button id="csv">Export CSV</button>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr>
+          <th class="l">Page</th><th>Impr.</th><th>Pos.</th><th>CTR</th><th>Exp. CTR</th><th id="engHead">Engage</th><th class="l" style="text-align:left">Verdict</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div id="more" style="padding:10px 16px;font-size:12px;color:var(--faint);text-align:center"></div>
+  </div>
+
+  <p class="note" id="note">A page is flagged when it ranks at or above your position threshold but its CTR is far below what that position should earn — and, if GA4 is loaded, visitors engage below the floor. <strong>Ranking but not answering</strong> = good rank, weak CTR, sub-60s engagement (rewrite to match intent). <strong>Thin answer</strong> = good rank, weak CTR, some engagement (expand coverage). <strong>CTR signal only</strong> = flagged on Search Console alone, no GA4 engagement to confirm. CTR expectations use a standard position curve; verify the SERP for ads or AI Overviews, which can floor real CTR.</p>
+
+  <footer>
+    <span>Built by <a href="https://hawkmarketing.io">Hawk Marketing</a> · SEO &amp; AI search consultancy</span>
+    <span class="mono">data stays in your browser</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var CTR={1:.275,2:.155,3:.1,4:.07,5:.05,6:.038,7:.03,8:.024,9:.02,10:.017};
+  function expCtr(p){if(p<=1)return CTR[1];if(p>=10)return CTR[10];var lo=Math.floor(p),hi=Math.ceil(p);if(lo===hi)return CTR[lo];return CTR[lo]+(CTR[hi]-CTR[lo])*(p-lo);}
+  var gsc=[], ga4={}, ga4Loaded=false;
+  var $=function(id){return document.getElementById(id);};
+  function fmt(n){return Number(n).toLocaleString();}
+
+  // normalise any URL/path to a bare path for joining GSC <-> GA4
+  function normPath(u){
+    if(u==null) return '';
+    var s=String(u).trim();
+    s=s.replace(/^https?:\/\/[^\/]+/i,'');     // strip protocol+domain (GSC full URLs)
+    s=s.split('?')[0].split('#')[0];            // drop query/hash
+    if(s==='') s='/';
+    if(s.length>1) s=s.replace(/\/+$/,'');      // strip trailing slash (but keep root '/')
+    return s.toLowerCase();
+  }
+  function pick(r,names){var keys=Object.keys(r);for(var i=0;i<names.length;i++){var k=keys.find(function(key){return key.trim().toLowerCase()===names[i];});if(k!=null)return r[k];}return undefined;}
+
+  function showErr(m){$('err').textContent=m;$('err').style.display='block';}
+
+  function handleGsc(file){
+    $('err').style.display='none';
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+        var sn=wb.SheetNames.find(function(s){return s.toLowerCase().indexOf('page')>-1;})||wb.SheetNames[0];
+        var raw=XLSX.utils.sheet_to_json(wb.Sheets[sn]);
+        var rows=raw.map(function(r){
+          var page=pick(r,['top pages','page','pages']);
+          var ctr=pick(r,['ctr']); var pos=pick(r,['position','avg. position','average position']);
+          var cl=pick(r,['clicks']); var im=pick(r,['impressions']);
+          if(typeof ctr==='string')ctr=parseFloat(ctr.replace('%',''))/100;
+          if(typeof ctr==='number'&&ctr>1.5)ctr=ctr/100;
+          return {page:String(page==null?'':page).trim(),path:normPath(page),clicks:Number(cl),impressions:Number(im),ctr:Number(ctr),position:Number(pos)};
+        }).filter(function(r){return r.page&&!isNaN(r.position)&&!isNaN(r.impressions);});
+        if(!rows.length){return showErr("Couldn't read GSC pages. Use a Search Console export with a Pages tab (page, clicks, impressions, CTR, position).");}
+        gsc=rows;
+        $('dropGsc').classList.add('loaded');
+        $('gscMsg').textContent='GSC loaded: '+fmt(rows.length)+' pages';
+        $('controls').style.display='block';
+        compute();
+      }catch(err){showErr("Couldn't read that GSC file. Use a .xlsx export from Search Console.");}
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function handleGa4(file){
+    $('err').style.display='none';
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var text;
+        if(file.name.toLowerCase().endsWith('.csv')){ text=e.target.result; parseGa4Csv(text); }
+        else { var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'}); var sn=wb.SheetNames[0]; parseGa4Rows(XLSX.utils.sheet_to_json(wb.Sheets[sn])); }
+      }catch(err){showErr("Couldn't read that GA4 file. Use the 'Pages and screens' export (CSV).");}
+    };
+    if(file.name.toLowerCase().endsWith('.csv')) reader.readAsText(file); else reader.readAsArrayBuffer(file);
+  }
+  function parseGa4Csv(text){
+    var lines=text.split(/\r?\n/).filter(function(l){return l.length;});
+    // GA4 prepends comment lines starting with '#'; the header is the first non-# line
+    var headerIdx=lines.findIndex(function(l){return l[0]!=='#';});
+    if(headerIdx<0){return showErr("Couldn't find a header row in the GA4 file.");}
+    var header=splitCsv(lines[headerIdx]);
+    var rows=[];
+    for(var i=headerIdx+1;i<lines.length;i++){
+      if(lines[i][0]==='#') continue;
+      var cells=splitCsv(lines[i]); if(cells.length<2) continue;
+      var o={}; header.forEach(function(h,j){o[h]=cells[j];}); rows.push(o);
+    }
+    parseGa4Rows(rows);
+  }
+  function splitCsv(line){
+    var out=[],cur='',q=false;
+    for(var i=0;i<line.length;i++){var c=line[i];
+      if(c==='"'){q=!q;} else if(c===','&&!q){out.push(cur);cur='';} else cur+=c;}
+    out.push(cur); return out.map(function(s){return s.trim();});
+  }
+  function parseGa4Rows(raw){
+    var map={};var n=0;
+    raw.forEach(function(r){
+      var path=pick(r,['page path and screen class','page path','landing page','page path + query string']);
+      var eng=pick(r,['average engagement time per active user','average engagement time','avg. engagement time']);
+      if(path==null) return;
+      var p=normPath(path); var e=parseFloat(eng);
+      if(isNaN(e)) e=0;
+      map[p]={engagement:e}; n++;
+    });
+    if(!n){return showErr("Couldn't read GA4 rows. Use the 'Pages and screens: Page path and screen class' export.");}
+    ga4=map; ga4Loaded=true;
+    $('dropGa4').classList.add('loaded');
+    $('ga4Msg').textContent='GA4 loaded: '+fmt(n)+' paths';
+    $('engHead').textContent='Engage (s)';
+    compute();
+  }
+
+  var last=[];
+  function compute(){
+    if(!gsc.length)return;
+    var maxpos=+$('maxpos').value, ratio=+$('ctrratio').value, minimpr=+$('minimpr').value, engfloor=+$('engfloor').value;
+    var matched=0;
+    var scored=gsc.filter(function(r){return r.position<=maxpos && r.impressions>=minimpr;}).map(function(r){
+      var exp=expCtr(r.position); var health=exp>0? r.ctr/exp : 1;
+      var g=ga4[r.path]; if(g) matched++;
+      var eng=g? g.engagement : null;
+      return {page:r.page,path:r.path,impr:r.impressions,pos:r.position,ctr:r.ctr,exp:exp,health:health,eng:eng};
+    });
+    // flag: CTR collapse is the core signal; GA4 refines the verdict
+    var flagged=scored.filter(function(r){return r.health<=ratio;}).map(function(r){
+      var verdict, cls;
+      if(r.eng==null){ verdict='CTR signal only'; cls='v-ctr'; }
+      else if(r.eng<60){ verdict='ranking but not answering'; cls='v-notans'; }
+      else { verdict='thin answer'; cls='v-thin'; }
+      r.verdict=verdict; r.vcls=cls; return r;
+    });
+    // if GA4 loaded, prioritise pages that ALSO fail the engagement floor
+    if(ga4Loaded){
+      flagged=flagged.filter(function(r){return r.eng==null || r.eng<=engfloor || r.health<=ratio*0.6;});
+    }
+    flagged.sort(function(a,b){return b.impr-a.impr;});
+    last=flagged;
+
+    // match bar
+    var mb=$('matchbar');
+    if(ga4Loaded){
+      var pct=scored.length? Math.round(matched/scored.length*100):0;
+      mb.style.display='block';
+      if(pct>=50){ mb.style.background='var(--forestSoft)'; mb.style.color='var(--forest)'; mb.innerHTML='✓ Joined GA4 engagement to <strong>'+matched+' of '+scored.length+'</strong> ranking pages ('+pct+'%).'; }
+      else { mb.style.background='var(--amberSoft)'; mb.style.color='var(--amber)'; mb.innerHTML='⚠ Only matched <strong>'+matched+' of '+scored.length+'</strong> pages ('+pct+'%) between GSC and GA4 — URL formats may differ. Verdicts for unmatched pages fall back to the CTR signal.'; }
+    } else { mb.style.display='none'; }
+
+    $('stats').style.display='grid';
+    var notAns=flagged.filter(function(r){return r.vcls==='v-notans';}).length;
+    $('stats').innerHTML=
+      card('Pages flagged',fmt(flagged.length),'of '+fmt(scored.length)+' ranking pages','var(--ink)')+
+      card(ga4Loaded?'Ranking but not answering':'CTR-collapse pages',fmt(ga4Loaded?notAns:flagged.length),ga4Loaded?'good rank · weak CTR · low engagement':'add GA4 to confirm intent','var(--accent)')+
+      card('GA4 engagement',ga4Loaded?'Joined':'Not loaded',ga4Loaded?fmt(matched)+' pages matched':'CTR signal only','var(--forest)');
+
+    var tb=$('tbody'); tb.innerHTML='';
+    flagged.slice(0,100).forEach(function(r){
+      var tr=document.createElement('tr');
+      var disp=r.page.replace(/^https?:\/\/[^\/]+/i,'')||'/';
+      tr.innerHTML=
+        '<td class="l" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.page+'">'+disp+'</td>'+
+        '<td style="color:var(--muted)">'+fmt(r.impr)+'</td>'+
+        '<td>'+r.pos.toFixed(1)+'</td>'+
+        '<td>'+(r.ctr*100).toFixed(2)+'%</td>'+
+        '<td style="color:var(--muted)">'+(r.exp*100).toFixed(1)+'%</td>'+
+        '<td>'+(r.eng==null?'<span style="color:var(--faint)">—</span>':r.eng.toFixed(0)+'s')+'</td>'+
+        '<td class="l"><span class="verdict '+r.vcls+'">'+r.verdict+'</span></td>';
+      tb.appendChild(tr);
+    });
+    $('more').textContent=flagged.length>100?('Showing top 100 of '+fmt(flagged.length)+' — export CSV for the full list'):'';
+    $('results').style.display='block'; $('note').style.display='block';
+  }
+  function card(l,v,s,c){return '<div class="stat"><div class="l">'+l+'</div><div class="v" style="color:'+c+'">'+v+'</div><div class="s">'+s+'</div></div>';}
+
+  function wire(dropId,inputId,handler){
+    var d=$(dropId);
+    d.addEventListener('click',function(){$(inputId).click();});
+    $(inputId).addEventListener('change',function(e){if(e.target.files[0])handler(e.target.files[0]);});
+    d.addEventListener('dragover',function(e){e.preventDefault();d.classList.add('drag');});
+    d.addEventListener('dragleave',function(){d.classList.remove('drag');});
+    d.addEventListener('drop',function(e){e.preventDefault();d.classList.remove('drag');if(e.dataTransfer.files[0])handler(e.dataTransfer.files[0]);});
+  }
+  wire('dropGsc','fileGsc',handleGsc);
+  wire('dropGa4','fileGa4',handleGa4);
+  ['maxpos','ctrratio','minimpr','engfloor'].forEach(function(id){$(id).addEventListener('input',compute);});
+  $('csv').addEventListener('click',function(){
+    if(!last.length)return;
+    var head=['page','impressions','position','ctr','expected_ctr','engagement_sec','verdict'];
+    var lines=[head.join(',')].concat(last.map(function(r){
+      return ['"'+r.page.replace(/"/g,'""')+'"',r.impr,r.pos.toFixed(1),(r.ctr*100).toFixed(2)+'%',(r.exp*100).toFixed(1)+'%',(r.eng==null?'':r.eng.toFixed(0)),'"'+r.verdict+'"'].join(',');
+    }));
+    var url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));
+    var a=document.createElement('a');a.href=url;a.download='intent-mismatch.csv';a.click();URL.revokeObjectURL(url);
+  });
+})();
+</script>
+</body>
+</html>
