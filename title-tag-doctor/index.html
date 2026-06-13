@@ -1,1 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Title Tag Doctor — Hawk Marketing</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#F5F2EA; --paper:#FFFFFF; --ink:#1C1B19; --muted:#6B6557; --faint:#9A9384;
+    --line:#E5E0D3; --accent:#C8472B; --accentSoft:#FBEAE4; --forest:#2F5D50; --forestSoft:#E6EFEB; --amber:#B45309; --amberSoft:#FBF0DD;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6}
+  .wrap{max-width:980px;margin:0 auto;padding:32px 22px 64px}
+  h1{font-family:'Fraunces',Georgia,serif;font-size:32px;font-weight:600;letter-spacing:-.01em;margin:0}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+  .serif{font-family:'Fraunces',Georgia,serif}
+  .tag{font-size:11px;color:var(--forest);border:1px solid var(--forest);border-radius:5px;padding:2px 7px}
+  .lead{color:var(--muted);font-size:14.5px;max-width:680px;margin:8px 0 24px}
+  .drop{background:var(--paper);border:1.5px dashed var(--line);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:.15s}
+  .drop:hover{border-color:var(--accent)}
+  .drop.drag{background:var(--accentSoft);border-color:var(--accent)}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:12px}
+  .controls{padding:18px;margin-top:16px;display:none}
+  .grid4{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;align-items:end}
+  label.f{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;display:block;margin-bottom:5px}
+  input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:13.5px;background:var(--paper);color:var(--ink);font-family:inherit}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .stats{display:none;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .stat .l{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .stat .v{font-family:'Fraunces',Georgia,serif;font-size:30px;font-weight:600;line-height:1.15;margin-top:3px}
+  .stat .s{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .results{margin-top:16px;overflow:hidden;display:none}
+  .rhead{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:10px}
+  .filterbtns{display:flex;gap:6px;flex-wrap:wrap}
+  .fbtn{background:#EFEBDF;color:var(--muted);border:none;border-radius:999px;padding:5px 12px;font-size:11.5px;font-weight:600;cursor:pointer}
+  .fbtn.on{background:var(--ink);color:#fff}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:right;padding:9px 14px;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);background:#FAF8F1;position:sticky;top:0}
+  th.l{text-align:left}
+  td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;vertical-align:top}
+  td.l{text-align:left}
+  tr:hover td{background:#FAF8F1}
+  .scroll{max-height:520px;overflow-y:auto}
+  button.exp{background:var(--ink);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+  button.exp:hover{opacity:.9}
+  .dx{font-size:12.5px;line-height:1.5}
+  .dxtag{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;display:inline-block;padding:2px 7px;border-radius:5px;margin-bottom:3px}
+  .dx-title{background:var(--accentSoft);color:var(--accent)}
+  .dx-serp{background:var(--amberSoft);color:var(--amber)}
+  .dx-diff{background:#EFEBDF;color:var(--muted)}
+  .note{font-size:12px;color:var(--faint);margin-top:14px;line-height:1.55;display:none}
+  .err{margin-top:12px;padding:10px 13px;background:var(--accentSoft);border-radius:8px;font-size:13px;color:#7a2a18;display:none}
+  footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer a{color:var(--muted);text-decoration:none}
+  @media(max-width:680px){.grid4{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+    <h1>Title Tag Doctor</h1>
+    <span class="mono tag">GSC EXPORT · RUNS LOCALLY</span>
+  </div>
+  <p class="lead">Finds the queries where you rank well but lose the click — then diagnoses <em>why</em>: a weak title at the top of the page, SERP features crowding you out, or a snippet that doesn't stand out from neighbours. Each comes with the fix. Drop a Search Console <strong>Queries</strong> export; everything runs in your browser.</p>
+
+  <div class="drop" id="drop">
+    <div style="font-size:14.5px;font-weight:600" id="dropmsg">Drop your GSC Queries export here, or click to choose</div>
+    <div class="mono" style="font-size:11.5px;color:var(--faint);margin-top:6px">.xlsx or .csv · reads the Queries tab</div>
+    <input type="file" id="file" accept=".xlsx,.csv" style="display:none" />
+  </div>
+  <div class="err" id="err"></div>
+
+  <div class="card controls" id="controls">
+    <div class="grid4">
+      <div><label class="f">Brand terms to strip (comma-sep)</label><input id="brand" type="text" placeholder="e.g. lottoland" /></div>
+      <div><label class="f">CTR health ceiling (× expected)</label><input id="ratio" type="number" step="0.05" value="0.6" /></div>
+      <div><label class="f">Min impressions</label><input id="minimpr" type="number" value="200" /></div>
+      <div><label class="f">Max position</label><input id="maxpos" type="number" value="10" /></div>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="card results" id="results">
+    <div class="rhead">
+      <span class="serif" style="font-size:18px;font-weight:600">Diagnoses</span>
+      <div class="filterbtns" id="filters">
+        <button class="fbtn on" data-f="all">All</button>
+        <button class="fbtn" data-f="title">Title failure</button>
+        <button class="fbtn" data-f="serp">SERP crowding</button>
+        <button class="fbtn" data-f="diff">Weak differentiator</button>
+      </div>
+      <button class="exp" id="csv">Export CSV</button>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr>
+          <th class="l">Query</th><th>Impr.</th><th>Pos.</th><th>CTR</th><th>Exp.</th><th>Missed</th><th class="l" style="text-align:left">Diagnosis &amp; fix</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div id="more" style="padding:10px 16px;font-size:12px;color:var(--faint);text-align:center"></div>
+  </div>
+
+  <p class="note" id="note">Each query is compared against the click-through rate expected for its position. Those falling well short are diagnosed by where they rank: <strong>top-3</strong> → the title/meta isn't winning the click you've earned; <strong>positions 4–6</strong> → SERP features (snippets, AI Overviews, ads) are likely intercepting clicks; <strong>positions 7–10</strong> → your snippet isn't standing out from neighbours. "Missed" estimates monthly clicks lost versus the expected curve. Verify the live SERP before rewriting — ads and AI Overviews can floor real CTR regardless of your title.</p>
+
+  <footer>
+    <span>Built by <a href="https://hawkmarketing.io">Hawk Marketing</a> · SEO &amp; AI search consultancy</span>
+    <span class="mono">data stays in your browser</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var CTR={1:.275,2:.155,3:.1,4:.07,5:.05,6:.038,7:.03,8:.024,9:.02,10:.017};
+  function expCtr(p){if(p<=1)return CTR[1];if(p>=10)return CTR[10];var lo=Math.floor(p),hi=Math.ceil(p);if(lo===hi)return CTR[lo];return CTR[lo]+(CTR[hi]-CTR[lo])*(p-lo);}
+  var rows=[], last=[], filter='all';
+  var $=function(id){return document.getElementById(id);};
+  function fmt(n){return Number(n).toLocaleString();}
+  function pick(r,names){var keys=Object.keys(r);for(var i=0;i<names.length;i++){var k=keys.find(function(key){return key.trim().toLowerCase()===names[i];});if(k!=null)return r[k];}return undefined;}
+  function parse(raw){return raw.map(function(r){var q=pick(r,['top queries','query','queries']);var ctr=pick(r,['ctr']);var pos=pick(r,['position','avg. position','average position']);var cl=pick(r,['clicks']);var im=pick(r,['impressions']);if(typeof ctr==='string')ctr=parseFloat(ctr.replace('%',''))/100;if(typeof ctr==='number'&&ctr>1.5)ctr=ctr/100;return {query:String(q==null?'':q).trim(),clicks:Number(cl),impressions:Number(im),ctr:Number(ctr),position:Number(pos)};}).filter(function(r){return r.query&&!isNaN(r.position)&&!isNaN(r.impressions);});}
+
+  function showErr(m){$('err').textContent=m;$('err').style.display='block';}
+
+  function handleFile(file){
+    $('err').style.display='none';
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+        var sn=wb.SheetNames.find(function(s){return s.toLowerCase().indexOf('quer')>-1;})||wb.SheetNames[0];
+        var parsed=parse(XLSX.utils.sheet_to_json(wb.Sheets[sn]));
+        if(!parsed.length){return showErr("Couldn't find query rows. Use a GSC Performance export with a Queries tab (query, clicks, impressions, CTR, position).");}
+        rows=parsed;
+        $('dropmsg').textContent='Loaded: '+file.name+' · '+fmt(rows.length)+' queries';
+        $('controls').style.display='block';
+        compute();
+      }catch(err){showErr("Couldn't read that file. Use a GSC export as .xlsx or .csv.");}
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function diagnose(pos){
+    if(pos<=3) return {cls:'dx-title',key:'title',tag:'Title failure',fix:'You rank at the top but aren\u2019t winning the click \u2014 the title/meta promise isn\u2019t compelling enough. Rewrite the headline to match the query\u2019s intent and add a clear benefit or differentiator.'};
+    if(pos<=6) return {cls:'dx-serp',key:'serp',tag:'SERP crowding',fix:'A snippet, AI Overview, or ads are likely intercepting clicks above you. Target the featured snippet (concise direct answer, structured format) or add schema to stand out.'};
+    return {cls:'dx-diff',key:'diff',tag:'Weak differentiator',fix:'You\u2019re on page one but your snippet isn\u2019t pulling clicks from neighbours. Sharpen the title with a specific hook \u2014 year, number, location, or unique angle \u2014 to out-compete the results around you.'};
+  }
+
+  function compute(){
+    if(!rows.length)return;
+    var brand=($('brand').value||'').split(',').map(function(s){return s.trim().toLowerCase();}).filter(Boolean);
+    var ratio=+$('ratio').value, minimpr=+$('minimpr').value, maxpos=+$('maxpos').value;
+    var isBrand=function(q){return brand.some(function(b){return q.toLowerCase().indexOf(b)>-1;});};
+    var stripped=rows.filter(function(r){return isBrand(r.query);}).length;
+    var flagged=rows.filter(function(r){return r.position<=maxpos && r.impressions>=minimpr && !isBrand(r.query);}).map(function(r){
+      var exp=expCtr(r.position); var health=exp>0? r.ctr/exp : 1;
+      var missed=Math.max(0,Math.round((exp-r.ctr)*r.impressions));
+      var d=diagnose(r.position);
+      return {query:r.query,impr:r.impressions,pos:r.position,ctr:r.ctr,exp:exp,health:health,missed:missed,dx:d};
+    }).filter(function(r){return r.health<=ratio;}).sort(function(a,b){return b.missed-a.missed;});
+    last=flagged;
+    var totalMissed=flagged.reduce(function(s,r){return s+r.missed;},0);
+    var counts={title:0,serp:0,diff:0};
+    flagged.forEach(function(r){counts[r.dx.key]++;});
+
+    $('stats').style.display='grid';
+    $('stats').innerHTML=
+      card('Queries to fix',fmt(flagged.length),'underperforming on CTR','var(--ink)')+
+      card('Est. monthly clicks lost',fmt(totalMissed),'vs expected for position','var(--accent)')+
+      card('Biggest bucket',
+        (counts.title>=counts.serp&&counts.title>=counts.diff)?'Title failure':
+        (counts.serp>=counts.diff)?'SERP crowding':'Weak differentiator',
+        counts.title+' title · '+counts.serp+' SERP · '+counts.diff+' diff','var(--forest)');
+
+    render();
+    $('note').style.display='block';
+  }
+  function render(){
+    var tb=$('tbody'); tb.innerHTML='';
+    var view=last.filter(function(r){return filter==='all'||r.dx.key===filter;});
+    view.slice(0,100).forEach(function(r){
+      var warn=r.health<0.25?' <span style="color:var(--amber);font-size:10.5px;font-weight:600" title="CTR far below expected \u2014 verify the SERP before rewriting">\u26a0</span>':'';
+      var tr=document.createElement('tr');
+      tr.innerHTML=
+        '<td class="l" style="max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.query+'">'+r.query+warn+'</td>'+
+        '<td style="color:var(--muted)">'+fmt(r.impr)+'</td>'+
+        '<td>'+r.pos.toFixed(1)+'</td>'+
+        '<td>'+(r.ctr*100).toFixed(2)+'%</td>'+
+        '<td style="color:var(--muted)">'+(r.exp*100).toFixed(1)+'%</td>'+
+        '<td style="font-weight:600;color:var(--accent)">'+fmt(r.missed)+'</td>'+
+        '<td class="l" style="max-width:340px"><span class="dxtag '+r.dx.cls+'">'+r.dx.tag+'</span><div class="dx">'+r.dx.fix+'</div></td>';
+      tb.appendChild(tr);
+    });
+    $('more').textContent=view.length>100?('Showing top 100 of '+fmt(view.length)+' \u2014 export CSV for the full list'):'';
+    $('results').style.display='block';
+  }
+  function card(l,v,s,c){return '<div class="stat"><div class="l">'+l+'</div><div class="v" style="color:'+c+'">'+v+'</div><div class="s">'+s+'</div></div>';}
+
+  $('drop').addEventListener('click',function(){$('file').click();});
+  $('file').addEventListener('change',function(e){if(e.target.files[0])handleFile(e.target.files[0]);});
+  ['brand','ratio','minimpr','maxpos'].forEach(function(id){$(id).addEventListener('input',compute);});
+  $('drop').addEventListener('dragover',function(e){e.preventDefault();$('drop').classList.add('drag');});
+  $('drop').addEventListener('dragleave',function(){$('drop').classList.remove('drag');});
+  $('drop').addEventListener('drop',function(e){e.preventDefault();$('drop').classList.remove('drag');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+  $('filters').addEventListener('click',function(e){
+    if(e.target.classList.contains('fbtn')){
+      [].forEach.call(document.querySelectorAll('.fbtn'),function(b){b.classList.remove('on');});
+      e.target.classList.add('on'); filter=e.target.getAttribute('data-f'); render();
+    }
+  });
+  $('csv').addEventListener('click',function(){
+    if(!last.length)return;
+    var head=['query','impressions','position','ctr','expected_ctr','missed_clicks','diagnosis','fix'];
+    var lines=[head.join(',')].concat(last.map(function(r){
+      return ['"'+r.query.replace(/"/g,'""')+'"',r.impr,r.pos.toFixed(1),(r.ctr*100).toFixed(2)+'%',(r.exp*100).toFixed(1)+'%',r.missed,'"'+r.dx.tag+'"','"'+r.dx.fix.replace(/"/g,'""')+'"'].join(',');
+    }));
+    var url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));
+    var a=document.createElement('a');a.href=url;a.download='title-tag-doctor.csv';a.click();URL.revokeObjectURL(url);
+  });
+})();
+</script>
+</body>
+</html>
 
