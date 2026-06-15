@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SEO Tools — Hawk Marketing</title>
+<meta name="description" content="Free, privacy-first SEO tools from Hawk Marketing. Turn a Search Console export into a prioritised action list — striking-distance opportunities, intent mismatches, title-tag fixes, and internal linking. Your data never leaves your browser." />
+<link rel="canonical" href="https://tools.hawkmarketing.io/" />
+<style>
+  :root{
+    --bg:#F5F2EA; --paper:#FFFFFF; --ink:#1C1B19; --muted:#6B6557; --faint:#9A9384;
+    --line:#E5E0D3; --accent:#C8472B; --accentSoft:#FBEAE4; --forest:#2F5D50; --forestSoft:#E6EFEB; --amber:#B45309;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6}
+  a{color:inherit}
+  .wrap{max-width:980px;margin:0 auto;padding:48px 22px 64px}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+  .serif{font-family:'Fraunces',Georgia,serif}
+  .brand{font-size:13px;letter-spacing:.04em;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:14px}
+  .brand a{text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:1px}
+  h1{font-family:'Fraunces',Georgia,serif;font-size:40px;font-weight:600;letter-spacing:-.015em;margin:0 0 14px;line-height:1.1}
+  .lead{color:var(--muted);font-size:16px;max-width:660px;margin:0 0 10px;line-height:1.6}
+  .privacy{display:inline-flex;align-items:center;gap:7px;background:var(--forestSoft);color:var(--forest);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:600;margin-top:14px}
+  .flow{margin:36px 0 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
+  .flowline{font-size:14.5px;color:var(--muted);margin-bottom:30px;line-height:1.6}
+  .flowline b{color:var(--ink);font-weight:600}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .tool{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px;text-decoration:none;display:flex;flex-direction:column;transition:transform .1s ease, box-shadow .15s ease, border-color .15s ease}
+  .tool:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(28,27,25,.07);border-color:var(--accent)}
+  .tool .step{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.06em}
+  .tool h2{font-family:'Fraunces',Georgia,serif;font-size:21px;font-weight:600;margin:8px 0 8px;line-height:1.2}
+  .tool p{font-size:13.5px;color:var(--muted);margin:0 0 16px;flex:1;line-height:1.55}
+  .tool .needs{font-size:11px;color:var(--faint);font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+  .tool .go{font-size:13px;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:6px}
+  .tool .go .arr{transition:transform .15s ease}
+  .tool:hover .go .arr{transform:translateX(3px)}
+  .how{margin-top:40px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px 28px}
+  .how h3{font-family:'Fraunces',Georgia,serif;font-size:19px;font-weight:600;margin:0 0 12px}
+  .how ol{margin:0;padding-left:20px;color:var(--muted);font-size:14px;line-height:1.7}
+  .how b{color:var(--ink);font-weight:600}
+  footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}h1{font-size:32px}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><a href="https://hawkmarketing.io">Hawk Marketing</a></div>
+  <h1>SEO tools that turn a Search Console export into an action list.</h1>
+  <p class="lead">A small suite of focused tools built for the way search work actually happens — drop in your Google Search Console data and get a prioritised list of what to fix, why, and what it's worth. Built by an SEO who got tired of doing this by hand in spreadsheets.</p>
+  <div class="privacy">🔒 Your data never leaves your browser — everything runs locally, nothing is uploaded.</div>
+
+  <div class="flow">The workflow</div>
+  <div class="flowline">Each tool handles one stage of turning rankings into traffic: <b>find</b> the queries worth chasing, <b>diagnose</b> the pages letting you down, <b>fix</b> the snippets losing clicks, and <b>reinforce</b> with the internal links you already have.</div>
+
+  <div class="grid">
+    <a class="tool" href="/striking-distance/">
+      <span class="step">01 · FIND</span>
+      <h2>Striking Distance</h2>
+      <p>Surfaces the queries ranking just off the top three — positions 4–12 with real impressions — where a small push has the most click upside. Ranks every opportunity by estimated clicks gained, with brand terms stripped.</p>
+      <div class="needs">needs: GSC Queries export</div>
+      <span class="go">Open tool <span class="arr">→</span></span>
+    </a>
+
+    <a class="tool" href="/intent-mismatch/">
+      <span class="step">02 · DIAGNOSE</span>
+      <h2>Intent Mismatch Auditor</h2>
+      <p>Finds pages that rank well but don't satisfy the visitor — strong position, collapsed click-through, and (with GA4) fast bounces. You're winning the ranking but losing the reader. Tells you which pages to rewrite to intent.</p>
+      <div class="needs">needs: GSC Pages export · GA4 optional</div>
+      <span class="go">Open tool <span class="arr">→</span></span>
+    </a>
+
+    <a class="tool" href="/title-tag-doctor/">
+      <span class="step">03 · FIX</span>
+      <h2>Title Tag Doctor</h2>
+      <p>Finds queries where you rank well but lose the click, then diagnoses why — weak title, SERP-feature crowding, or a snippet that doesn't stand out — and prescribes the fix. Prioritised by clicks lost each month.</p>
+      <div class="needs">needs: GSC Queries export</div>
+      <span class="go">Open tool <span class="arr">→</span></span>
+    </a>
+
+    <a class="tool" href="/internal-link-reallocator/">
+      <span class="step">04 · REINFORCE</span>
+      <h2>Internal Link Reallocator</h2>
+      <p>Pairs your strong pages with striking-distance targets on the same topic, so you push struggling pages up using authority you already have. Surfaces the internal links worth adding, ranked by donor strength.</p>
+      <div class="needs">needs: GSC Pages export</div>
+      <span class="go">Open tool <span class="arr">→</span></span>
+    </a>
+  </div>
+
+  <div class="how">
+    <h3>Getting your data</h3>
+    <ol>
+      <li>In <b>Google Search Console</b>, open <b>Performance → Search results</b>, set your date range, and click <b>Export → Excel</b>.</li>
+      <li>The export has separate <b>Queries</b> and <b>Pages</b> tabs — each tool reads whichever it needs.</li>
+      <li>For the Intent Mismatch Auditor's engagement view, also export <b>Pages and screens</b> from GA4 (<b>Reports → Engagement</b>).</li>
+      <li>Drop the file into the tool. It's parsed in your browser — nothing is sent anywhere.</li>
+    </ol>
+  </div>
+
+  <footer>
+    <span>Built by <a href="https://hawkmarketing.io">Hawk Marketing</a> — SEO, AEO &amp; digital PR consultancy.</span>
+    <span class="mono">More tools in progress.</span>
+  </footer>
+</div>
+</body>
+</html>
